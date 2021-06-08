@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Confluent Inc.
+# Copyright 2021 Confluent Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,20 +31,15 @@ These commands log any output to stderr and returns with exitcode=0 if successfu
 
 """
 
-from __future__ import print_function
 import os
 import sys
-from jinja2 import Environment, FileSystemLoader
-import requests
+import urllib.request
+import urllib.parse as urlparse
 import socket
 import time
 import re
 import argparse
-
-try:  # Python 2 vs 3
-    import urlparse
-except ImportError:
-    import urllib.parse as urlparse
+from jinja2 import Environment, FileSystemLoader
 
 
 def env_to_props(env_prefix, prop_prefix, exclude=[]):
@@ -185,11 +180,12 @@ def check_http_ready(url, timeout):
     if status:
 
         # Check if service is responding as expected
-        r = requests.get(url)
-        if r.status_code // 100 == 2:
+        r = urllib.request.urlopen(url)
+        text = r.read().decode('utf-8')
+        if r.getcode() // 100 == 2:
             return True
         else:
-            print("Unexpected response for %s, with code: %s and content: %s" % (str(url), str(r.status_code), str(r.text)), file=sys.stderr)
+            print("Unexpected response for %s, with code: %s and content: %s" % (str(url), str(r.getcode()), text), file=sys.stderr)
             return False
     else:
         print("%s cannot be reached on port %s." % (str(host), str(port)), file=sys.stderr)

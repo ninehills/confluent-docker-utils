@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Confluent Inc.
+# Copyright 2021 Confluent Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,13 +34,12 @@ The script supports following commands:
 These commands log any output to stderr and returns with exitcode 0 if successful, 1 otherwise.
 
 """
-from __future__ import print_function
 import os
 import sys
 import socket
 import time
 import re
-import requests
+import urllib.request
 import subprocess
 
 CLASSPATH = os.environ.get("CUB_CLASSPATH", '"/usr/share/java/cp-base/*:/usr/share/java/cp-base-new/*"')
@@ -188,12 +187,13 @@ def check_schema_registry_ready(host, port, service_timeout):
     if status:
         # Check if service is responding as expected to basic request
         url = "http://%s:%s/config" % (host, port)
-        r = requests.get(url)
+        r = urllib.request.urlopen(url)
+        text = r.read().decode('utf-8')
         # The call should always return the compatibilityLevel
-        if r.status_code // 100 == 2 and 'compatibilityLevel' in str(r.text):
+        if r.getcode() // 100 == 2 and 'compatibilityLevel' in text:
             return True
         else:
-            print("Unexpected response with code: %s and content: %s" % (str(r.status_code), str(r.text)), file=sys.stderr)
+            print("Unexpected response with code: %s and content: %s" % (str(r.getcode()), text), file=sys.stderr)
             return False
     else:
         print("%s cannot be reached on port %s." % (str(host), str(port)), file=sys.stderr)
@@ -221,11 +221,12 @@ def check_kafka_rest_ready(host, port, service_timeout):
         # Try to get topic list
         # NOTE: this will only test ZK <> REST Proxy interaction
         url = "http://%s:%s/topics" % (host, port)
-        r = requests.get(url)
-        if r.status_code // 100 == 2:
+        r = urllib.request.urlopen(url)
+        text = r.read().decode('utf-8')
+        if r.getcode() // 100 == 2:
             return True
         else:
-            print("Unexpected response with code: %s and content: %s" % (str(r.status_code), str(r.text)), file=sys.stderr)
+            print("Unexpected response with code: %s and content: %s" % (str(r.getcode()), text), file=sys.stderr)
             return False
     else:
         print("%s cannot be reached on port %s." % (str(host), str(port)), file=sys.stderr)
@@ -251,12 +252,13 @@ def check_connect_ready(host, port, service_timeout):
     if status:
         # Check if service is responding as expected to basic request
         url = "http://%s:%s" % (host, port)
-        r = requests.get(url)
+        r = urllib.request.urlopen(url)
+        text = r.read().decode('utf-8')
         # The call should always return a json string including version
-        if r.status_code // 100 == 2 and 'version' in str(r.text):
+        if r.getcode() // 100 == 2 and 'version' in text:
             return True
         else:
-            print("Unexpected response with code: %s and content: %s" % (str(r.status_code), str(r.text)), file=sys.stderr)
+            print("Unexpected response with code: %s and content: %s" % (str(r.getcode()), text), file=sys.stderr)
             return False
     else:
         print("%s cannot be reached on port %s." % (str(host), str(port)), file=sys.stderr)
@@ -282,12 +284,13 @@ def check_ksql_server_ready(host, port, service_timeout):
     if status:
         # Check if service is responding as expected to basic request
         url = "http://%s:%s/info" % (host, port)
-        r = requests.get(url)
+        r = urllib.request.urlopen(url)
+        text = r.read().decode('utf-8')
         # The call should always return a json string including version
-        if r.status_code // 100 == 2 and 'Ksql' in str(r.text):
+        if r.getcode() // 100 == 2 and 'Ksql' in text:
             return True
         else:
-            print("Unexpected response with code: %s and content: %s" % (str(r.status_code), str(r.text)), file=sys.stderr)
+            print("Unexpected response with code: %s and content: %s" % (str(r.getcode()), text), file=sys.stderr)
             return False
     else:
         print("%s cannot be reached on port %s." % (str(host), str(port)), file=sys.stderr)
@@ -313,12 +316,13 @@ def check_control_center_ready(host, port, service_timeout):
     if status:
         # Check if service is responding as expected to basic request
         url = "http://%s:%s" % (host, port)
-        r = requests.get(url)
+        r = urllib.request.urlopen(url)
+        text = r.read().decode('utf-8')
         # The call should always return a json string including version
-        if r.status_code // 100 == 2 and 'Control Center' in str(r.text):
+        if r.getcode() // 100 == 2 and 'Control Center' in text:
             return True
         else:
-            print("Unexpected response with code: %s and content: %s" % (str(r.status_code), str(r.text)), file=sys.stderr)
+            print("Unexpected response with code: %s and content: %s" % (str(r.getcode()), text), file=sys.stderr)
             return False
     else:
         print("%s cannot be reached on port %s." % (str(host), str(port)), file=sys.stderr)

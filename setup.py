@@ -3,12 +3,12 @@ from setuptools import setup
 
 setup(
     name='confluent-docker-utils',
-    version='0.0.44',
+    version='0.1.0',
 
     author="Confluent, Inc.",
     author_email="partner-support@confluent.io",
 
-    description='Common utils for Docker image sanity tests',
+    description='Utilities for configuring and launching Confluent Services inside Docker Images',
 
     url="https://github.com/confluentinc/confluent-docker-utils",
 
