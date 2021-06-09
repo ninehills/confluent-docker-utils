@@ -299,7 +299,7 @@ def fill_and_write_template(template_file, output_file, context=os.environ):
         return False
 
 
-def main():
+def main(): # pragma: no cover
     root = argparse.ArgumentParser(description='Docker Utility Belt.')
 
     actions = root.add_subparsers(help='Actions', dest='action')

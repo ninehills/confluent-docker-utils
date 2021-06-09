@@ -42,3 +42,9 @@ def test_env_to_props():
         assert "kafka.with_underscore.and.more" in result
         assert "kafka.with-dash" in result
         assert "kafka.with-dash.and.more" in result
+
+
+def test_parse_log4j_loggers():
+    assert dub.parse_log4j_loggers("") == {}
+    assert dub.parse_log4j_loggers("foo.bar=DEBUG") == {'foo.bar': "DEBUG"}
+    assert dub.parse_log4j_loggers("foo.bar=DEBUG,baz.bam=TRACE") == {'foo.bar': "DEBUG", 'baz.bam': 'TRACE'}
